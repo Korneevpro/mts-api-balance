@@ -10,7 +10,7 @@ sudo chmod +x /usr/lib/zabbix/externalscripts/get_data_mts.sh
 
 sudo chown zabbix:zabbix /usr/lib/zabbix/externalscripts/get_data_mts.sh
 
-после чего в zabbix создается новый узел, применяется у нему шаблон MTS balance.
+после чего в zabbix создается новый узел, применяется к нему шаблон MTS balance.
 
 В макросах шаблока указываете номер телефона и логин и пароль для получения динамического токена
 
