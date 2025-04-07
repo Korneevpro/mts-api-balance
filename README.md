@@ -1,3 +1,8 @@
+Для работы скрипта требуется пакет jq
+
+sudo apt update
+sudo apt install jq
+
 Cкрипт используется как внешняя проверка в zabbix для получения информации о состоянии счета и оставшихся минут на номере МТС.
 
 файл get_data_mts.sh кладем в /usr/lib/zabbix/externalscripts/
