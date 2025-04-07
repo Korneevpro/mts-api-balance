@@ -1,0 +1,88 @@
+zabbix_export:
+  version: '7.2'
+  template_groups:
+    - uuid: a571c0d144b14fd4a87a9d9b2aa9fcd6
+      name: Templates/Applications
+  templates:
+    - uuid: 91dd2d4f134245ef9580a4d2b6f451bd
+      template: 'MTS balance'
+      name: 'MTS balance'
+      groups:
+        - name: Templates/Applications
+      items:
+        - uuid: dbdaa9beb6514c8f89df10decd87b8c9
+          name: 'запрос данных'
+          type: EXTERNAL
+          key: 'get_data_mts.sh["{$PHONE}","{$LOGIN}","{$PASSWD}"]'
+          delay: 10s
+          history: 1d
+          value_type: TEXT
+        - uuid: c744ecc21c4b49f59b60c60e129a8774
+          name: Баланс
+          type: DEPENDENT
+          key: mts.balance
+          history: 365d
+          value_type: FLOAT
+          trends: '0'
+          units: руб
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..remainedAmount.amount
+            - type: REGEX
+              parameters:
+                - '\[(\d+\.\d+)\]'
+                - \1
+            - type: REGEX
+              parameters:
+                - '(\d+\.\d{2})\d*'
+                - \1
+            - type: JAVASCRIPT
+              parameters:
+                - 'return String(Math.round(value));'
+          master_item:
+            key: 'get_data_mts.sh["{$PHONE}","{$LOGIN}","{$PASSWD}"]'
+        - uuid: 7ceb7fab61a647e1a62b3c5f8d461f4a
+          name: 'Остаток минут'
+          type: DEPENDENT
+          key: mts.minuts
+          history: 365d
+          units: минут
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..prodSpecCharacteristicValue[?(@.valueType == ''CurrentValue'')].value'
+            - type: REGEX
+              parameters:
+                - '\[\"(\d+)\"\]'
+                - \1
+            - type: MULTIPLIER
+              parameters:
+                - '0.016666666666667'
+            - type: JAVASCRIPT
+              parameters:
+                - 'return String(Math.round(value));'
+          master_item:
+            key: 'get_data_mts.sh["{$PHONE}","{$LOGIN}","{$PASSWD}"]'
+      macros:
+        - macro: '{$LOGIN}'
+          value: ''
+        - macro: '{$PASSWD}'
+          value: ''
+        - macro: '{$PHONE}'
+          value: ''
+  graphs:
+    - uuid: abf6f1dad1f24910b36dcf904fe3f561
+      name: 'MTS'
+      graph_items:
+        - color: 8BC34A
+          calc_fnc: ALL
+          item:
+            host: 'MTS balance'
+            key: mts.balance
+        - sortorder: '1'
+          color: B71C1C
+          calc_fnc: ALL
+          item:
+            host: 'MTS balance'
+            key: mts.minuts
